@@ -108,14 +108,19 @@
 </section>
 
 <!-- Modal -->
-<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="passwordModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="passwordModalLabel">Inserisci la password</h1>
             </div>
             <div class="modal-body">
-                <form onsubmit="savePassword()">
+                <form onsubmit="login()">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="Username">
+                    </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" placeholder="Password">
@@ -123,7 +128,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="savePassword()">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="login()">Save changes</button>
             </div>
         </div>
     </div>
@@ -135,7 +140,6 @@
     let events = [];
     let bets = [];
     let id = 'new'
-    let password = '';
 
     function updateSportsSelect() {
         const sportSelect = document.getElementById('sport-select');
@@ -359,7 +363,6 @@
             amount,
             sport,
             bets,
-            password,
             claimed: false
         };
 
@@ -386,16 +389,39 @@
 
     const passwordModal = new bootstrap.Modal(document.getElementById("passwordModal"), {});
 
-    function savePassword() {
+    function login() {
         window.event.preventDefault();
-        password = document.getElementById('password').value;
-        passwordModal.hide();
+
+        let user = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        }
+        fetch(`${apiBaseUrl}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user),
+            credentials: 'include'
+        }).then(response => response.json())
+            .then(data => {
+                if (data.message === "Logged in successfully") {
+                    passwordModal.hide();
+                }
+            });
     }
 
     (() => {
-        document.onreadystatechange = function () {
-            passwordModal.show();
-        };
+        fetch(`${apiBaseUrl}/auth/login`, {
+        method: 'GET',
+        credentials: 'include'
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.loggedIn === false) {
+                passwordModal.show();
+            }
+        });
 
 
         const urlParams = new URLSearchParams(window.location.search);
