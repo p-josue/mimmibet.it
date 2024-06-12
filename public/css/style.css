@@ -54,3 +54,15 @@ body {
 .full-width {
     width: 100%;
 }
+.content {
+    min-height: calc(100vh - 56px);
+}
+
+.logo-main-100 {
+    max-width: 100%;
+    margin: 0 auto;
+}
+.logo-main-80 {
+    max-width: 80%;
+    margin: 0 auto;
+}
