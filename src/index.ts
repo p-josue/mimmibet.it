@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { staticPlugin } from '@elysiajs/static'
 import ApiV1 from "./api/api.module";
+import router from "./api/api.module";
 
 const app =
     new Elysia()
@@ -26,6 +27,7 @@ app.get('/admin', () => {
 });
 
 app.use(ApiV1);
+
 
 
 console.log(

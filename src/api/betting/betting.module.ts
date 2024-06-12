@@ -35,7 +35,7 @@ router.get('/:id', ({params: {id}}) => {
     }
     return bet;
 });
-router.post('/:id', ({params: {id}, body: {name, phone, amount, bets, sport, password, claimed}}: {
+router.post('/:id', ({params: {id}, body: {name, phone, amount, bets, sport, claimed}, store}: {
     params: { id: string; };
     body: {
         bets: string;
@@ -43,13 +43,12 @@ router.post('/:id', ({params: {id}, body: {name, phone, amount, bets, sport, pas
         name: string;
         phone: string;
         amount: number;
-        password: string;
         claimed: boolean;
     };
+    store: { session: { loggedIn: boolean; }; };
 }) => {
-    console.log(password, process.env.BETTING_PASSWORD)
-    if (password !== process.env.BETTING_PASSWORD) {
-        throw new Error('Invalid password');
+    if (!store.session.loggedIn) {
+        throw new Error('Not logged in');
     }
     let bet;
     if (id && id !== 'new') {
@@ -83,9 +82,13 @@ router.post('/:id', ({params: {id}, body: {name, phone, amount, bets, sport, pas
     };
 });
 
-router.post('/:id/claim', ({params: {id}}: {
+router.post('/:id/claim', ({params: {id}, store}: {
     params: { id: string; };
+    store: { session: { loggedIn: boolean; }; };
 }) => {
+    if (!store.session.loggedIn) {
+        throw new Error('Not logged in');
+    }
     const bet = Bets.find((bet: { id: string; }) => bet.id === id);
     if (!bet) {
         throw new Error('Bet not found');
