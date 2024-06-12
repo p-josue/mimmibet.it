@@ -77,7 +77,6 @@
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" placeholder="Username">
                     </div>
-                    >
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" placeholder="Password">
@@ -93,6 +92,7 @@
 
 <script>
 
+    const passwordModal = new bootstrap.Modal(document.getElementById("passwordModal"), {});
     const apiBaseUrl = '/api/v1';
     let bets = [];
 
@@ -109,7 +109,8 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         })
             .then(response => response.json())
             .then(data => {
@@ -123,42 +124,45 @@
     }
 
     function login() {
+        window.event.preventDefault();
+
         let user = {
             username: document.getElementById('username').value,
             password: document.getElementById('password').value
         }
-        fetch(`${apiBaseUrl}/betting/checkLogin`, {
+        fetch(`${apiBaseUrl}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(user)
-        })
+            body: JSON.stringify(user),
+            credentials: 'include'
+        }).then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.loggedIn === true) {
+                    passwordModal.hide();
+                }
+            });
     }
 
     (() => {
-        let user = {
-            username: document.cookie.split('=')[1],
-            password: document.cookie.split('=')[2]
-        }
-        fetch(`${apiBaseUrl}/betting/checkLogin`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(user)
+        fetch(`${apiBaseUrl}/auth/login`, {
+            method: 'GET',
+            credentials: 'include'
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
-                if (data === false) {
-                    $('#passwordModal').modal('show');
+                if (data.loggedIn === false) {
+                    passwordModal.show();
                 }
             });
 
 
         const url = `${apiBaseUrl}/betting/bet`;
-        fetch(url)
+        fetch(url,{
+            credentials: 'include'
+        })
             .then(response => response.json())
             .then(data => {
                 bets = data;

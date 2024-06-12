@@ -25,7 +25,13 @@ const generateBetId = () => {
 const saveBets = () => {
     require('fs').writeFileSync(require('path').join(__dirname, '../../../data/betting.json'), JSON.stringify(Bets));
 }
-router.get('/bet', () => {
+router.get('/bet', ({store}: {
+    store: { session: { loggedIn: boolean; }; };
+}) => {
+    console.log(store.session);
+    if (!store.session.loggedIn) {
+        throw new Error('Not logged in');
+    }
     return Bets;
 });
 router.get('/:id', ({params: {id}}) => {
@@ -98,18 +104,6 @@ router.post('/:id/claim', ({params: {id}, store}: {
     return {
         id: bet.id
     };
-});
-
-router.post('/checkLogin', ({body: {username, password}}: {
-    body: { username: string; password: string; };
-}) => {
-    if (username === process.env.BETTING_USERNAME) {
-        if (password === process.env.BETTING_PASSWORD) {
-            return true;
-        }
-    } else {
-        return false;
-    }
 });
 
 export default router;

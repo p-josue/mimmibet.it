@@ -28,6 +28,7 @@ export const AuthGuard = ({sessionKey = "auth"}: {
                 [sessionKey]: {
                     value: sessionId,
                     httpOnly: true,
+                    path: '/',
                     // secure: true,
                     // sameSite: 'strict',
                 }
