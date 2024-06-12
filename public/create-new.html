@@ -67,7 +67,7 @@
                             </div>
                             <div class="col-12 mb-5" id="bet-slip-rows">
                                 <div class="text-center">
-                                    <span>Nessuna scommessa selzionata</span>
+                                    <span>Nessuna scommessa selezionata</span>
                                 </div>
                             </div>
                             <div class="col-9 ps-5">
@@ -77,6 +77,15 @@
                                 <div class="mb-3 ">
                                     <input type="text" class="form-control border-0 text-end" id="amount"
                                            aria-describedby="emailHelp" placeholder="0" onchange="updateTotal()">
+                                </div>
+                            </div>
+                            <div class="col-9 ps-5">
+                                <span class="h5">IMPORTO TASSE $</span>
+                            </div>
+                            <div class="col-3 text-end">
+                                <div class="mb-3 ">
+                                    <input type="text" class="form-control border-0 text-end no-background" id="tax"
+                                           aria-describedby="emailHelp" placeholder="0" disabled>
                                 </div>
                             </div>
                             <div class="col-9 ps-5">
@@ -277,12 +286,14 @@
     function updateTotal() {
         const amount = document.getElementById('amount').value;
         const total = document.getElementById('total');
+        const tax = document.getElementById('tax');
+        tax.value = parseInt(amount * 0.1);
         const totalAmount = bets.reduce((acc, bet) => {
             const event = events.find(event => event.id === bet.event);
             const bookmakerMarket = event.bookmaker.markets[0];
             const winnerName = bet.winner === 'draw' ? 'Draw' : bet.winner === 'home' ? event.home_team : event.away_team;
             const quote = bookmakerMarket.outcomes.find(outcome => outcome.name === winnerName).price;
-            return acc + (quote * amount);
+            return acc + (quote * (amount - tax.value));
         }, 0);
         total.value = parseInt(totalAmount);
     }
