@@ -74,3 +74,10 @@ body {
     background-position: center;
     background-image: url("/img/paid.png");
 }
+.footer-background {
+    background-color: #157347;
+}
+
+.main-background {
+    background-color: #050e0c;
+}
