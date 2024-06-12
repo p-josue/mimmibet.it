@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MimmiBet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <h1 class="text-center mt-3 mb-3">MimmiBet</h1>
+                <div class="row">
+                    <div class="col-12 mt-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <select class="form-select" aria-label="Default select example" id="sport-select"
+                                    onchange="changeSport()">
+                                    <option selected>Caricando...</option>
+                                </select>
+                            </div>
+                            <div class="card-body" id="odds">
+                                <div class="d-flex justify-content-center">
+                                    <span>Seleziona uno sport</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 position-relative">
+                <div class="bet-slip">
+                    <div class="bet-slip-logo mt-5">
+                        <img src="img/mimmi-sport-logo.png" alt="MimmiBet">
+                    </div>
+                    <div class="p-3">
+                        <form class="row">
+                            <div class="col-6">
+                                <div class="mb-3 text-center">
+                                    <label for="name" class="form-label h6"><b>Nome e cognome</b></label>
+                                    <input type="text" class="form-control border-0 text-center" id="name" aria-describedby="emailHelp" placeholder="Lorenzo Mimmi">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3 text-center">
+                                    <label for="phone" class="form-label h6"><b>Telefono</b></label>
+                                    <input type="text" class="form-control border-0 text-center" id="phone" placeholder="3311223344">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="text-center">
+                                    <b>MULTIPLA A QUOTA FISSA</b>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-5" id="bet-slip-rows">
+                                <div class="text-center">
+                                    <span>Nessuna scommessa selzionata</span>
+                                </div>
+                            </div>
+                            <div class="col-9 ps-5">
+                                <span class="h5">IMPORTO SCOMMESSO $</span>
+                            </div>
+                            <div class="col-3 text-end">
+                                <div class="mb-3 ">
+                                    <input type="text" class="form-control border-0 text-end" id="amount"
+                                           aria-describedby="emailHelp" placeholder="0" onchange="updateTotal()">
+                                </div>
+                            </div>
+                            <div class="col-9 ps-5">
+                                <span class="h5">IMPORTO PAGAMENTO $</span>
+                            </div>
+                            <div class="col-3 text-end">
+                                <div class="mb-3 ">
+                                    <input type="text" class="form-control border-0 text-end no-background" id="total" aria-describedby="emailHelp" placeholder="0" disabled>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button class="btn btn-primary" onclick="saveBets()">SALVA</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="passwordModalLabel">Inserisci la password</h1>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="savePassword()">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="savePassword()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const apiBaseUrl = '/api/v1';
+    let events = [];
+    let bets = [];
+    let id = 'new'
+    let password = '';
+
+    function updateSportsSelect() {
+        const sportSelect = document.getElementById('sport-select');
+        const url = `${apiBaseUrl}/toa/sports`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                sportSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.innerText = 'Seleziona uno sport';
+                sportSelect.appendChild(defaultOption);
+
+                data.forEach(sport => {
+                    const option = document.createElement('option');
+                    option.value = sport.key;
+                    option.innerText = sport.title;
+                    sportSelect.appendChild(option);
+                });
+            });
+    }
+
+    function getOdds(sportKey) {
+        const url = `${apiBaseUrl}/toa/sports/${sportKey}`;
+        const odds = document.getElementById('odds');
+        odds.innerHTML = `
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                events = data
+                    .map(event => ({
+                        ...event,
+                        bookmaker: event.bookmakers
+                            .find(bookmaker => bookmaker.key === 'sport888')
+                    }))
+                    .filter(event => event.bookmaker);
+
+                updateEvents();
+            });
+    }
+
+    function updateLists() {
+        updateEvents();
+        updateBets();
+        updateTotal();
+    }
+
+    function updateEvents() {
+        const odds = document.getElementById('odds');
+        odds.innerHTML = '';
+
+        events.forEach(event => {
+            const row = document.createElement('div');
+            row.classList.add('row', 'align-items-end', 'mt-3', 'mb-5', 'event');
+            row.dataset.eventId = event.id;
+
+            const homeTeam = event.home_team;
+            const awayTeam = event.away_team;
+
+            const bookmakerMarket = event.bookmaker.markets[0];
+
+            const homeTeamQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === homeTeam).price;
+            const drawQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === 'Draw')?.price;
+            const awayTeamQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === awayTeam).price;
+
+            const bet = bets.find(bet => bet.event === event.id);
+
+            row.innerHTML = `
+                            <div class="col-5">
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <h5>${homeTeam}</h5>
+                                    <button class="btn ${bet?.winner === 'home'? 'btn-primary':'btn-outline-primary'}" onclick="addBet(this, '${homeTeam}')">
+                                        <span class="quotation">${homeTeamQuotation}</span>
+                                        <i class="fas fa-dollar"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <div>vs</div>
+                                    <button class="btn ${bet?.winner === 'draw'? 'btn-primary':'btn-outline-primary'} ${drawQuotation?'':'d-none'}" onclick="addBet(this)">
+                                        <span class="quotation">${drawQuotation}</span>
+                                        <i class="fas fa-dollar"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <h5>${awayTeam}</h5>
+                                    <button class="btn ${bet?.winner === 'away'? 'btn-primary':'btn-outline-primary'}" onclick="addBet(this, '${awayTeam}')">
+                                        <span class="quotation">${awayTeamQuotation}</span>
+                                        <i class="fas fa-dollar"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+            odds.appendChild(row);
+        });
+    }
+
+    function updateBets() {
+        const betSlipRows = document.getElementById('bet-slip-rows');
+        betSlipRows.innerHTML = '';
+
+        bets.forEach(bet => {
+            const row = document.createElement('div');
+            row.classList.add('bet-event');
+
+            let betWinner = 'X';
+            if (bet.winner === 'home') {
+                betWinner = '1';
+            } else if (bet.winner === 'away') {
+                betWinner = '2';
+            }
+            const event = events.find(event => event.id === bet.event);
+            let winnerName = 'Draw';
+            if (bet.winner === 'home') {
+                winnerName = event.home_team;
+            } else if (bet.winner === 'away') {
+                winnerName = event.away_team;
+            }
+            const bookmakerMarket = event.bookmaker.markets[0];
+            console.log(winnerName);
+            console.log(bookmakerMarket.outcomes);
+            console.log(bookmakerMarket.outcomes.find(outcome => outcome.name === winnerName));
+            const quote = bookmakerMarket.outcomes.find(outcome => outcome.name === winnerName).price;
+
+            row.innerHTML = `
+                <div><span>11 DIC 16:00</span> <span class="ms-2">UEFA Euro 2024</span></div>
+                <div class="bet-event-title"><b>${bet.homeTeam} - ${bet.awayTeam}</b></div>
+                <div class="d-flex justify-content-between">
+                    <div>TESTA A TESTA RISULTATO <span class="ms-5">${betWinner}</span></div>
+                    <div class="bet-event-quote">${quote}</div>
+                </div>
+            `;
+            betSlipRows.appendChild(row);
+        });
+    }
+
+    function updateTotal() {
+        const amount = document.getElementById('amount').value;
+        const total = document.getElementById('total');
+        const totalAmount = bets.reduce((acc, bet) => {
+            const event = events.find(event => event.id === bet.event);
+            const bookmakerMarket = event.bookmaker.markets[0];
+            const winnerName = bet.winner === 'draw' ? 'Draw' : bet.winner === 'home' ? event.home_team : event.away_team;
+            const quote = bookmakerMarket.outcomes.find(outcome => outcome.name === winnerName).price;
+            return acc + (quote * amount);
+        }, 0);
+        total.value = parseInt(totalAmount);
+    }
+
+    function changeSport() {
+        const sportSelect = document.getElementById('sport-select');
+        const sportKey = sportSelect.value;
+        getOdds(sportKey);
+    }
+
+    function addBet(button, team) {
+        const row = button.closest('.event');
+        const eventId = row.dataset.eventId;
+        const event = events.find(event => event.id === eventId);
+        const homeTeam = event.home_team;
+        const awayTeam = event.away_team;
+
+        let bet = bets.find(bet => bet.event === eventId);
+        let winner = null;
+
+        if (team) {
+            if (team === homeTeam) {
+                winner = 'home';
+            } else if (team === awayTeam) {
+                winner = 'away';
+            }
+        } else {
+            winner = 'draw';
+        }
+
+        if (!bet) {
+            bet = {
+                event: eventId,
+                homeTeam,
+                awayTeam,
+                winner: winner
+            };
+            bets.push(bet);
+        } else {
+            if (bet.winner === winner) {
+                bet.winner = null;
+            } else {
+                bet.winner = winner;
+            }
+        }
+
+        bets = bets.filter(bet => bet.winner);
+
+        updateLists();
+    }
+
+    function saveBets() {
+        window.event.preventDefault();
+        event.preventDefault();
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const amount = document.getElementById('amount').value;
+        const sport = document.getElementById('sport-select').value;
+
+        const data = {
+            name,
+            phone,
+            amount,
+            sport,
+            bets,
+            password
+        };
+
+        fetch(`${apiBaseUrl}/betting/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Bet saved')
+                console.log(data);
+                if (data.id) {
+                    id = data.id;
+                    window.location.href = '/schedina.html?id=' + id;
+                } else {
+                    window.location.href = '/';
+                }
+            });
+    }
+
+
+    const passwordModal = new bootstrap.Modal(document.getElementById("passwordModal"), {});
+
+    function savePassword() {
+        window.event.preventDefault();
+        password = document.getElementById('password').value;
+        passwordModal.hide();
+    }
+
+    (() => {
+        document.onreadystatechange = function () {
+            passwordModal.show();
+        };
+
+
+        const urlParams = new URLSearchParams(window.location.search);
+        id = urlParams.get('id') || 'new';
+        if (id !== 'new') {
+            fetch(`${apiBaseUrl}/betting/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('name').value = data.name;
+                    document.getElementById('phone').value = data.phone;
+                    document.getElementById('amount').value = data.amount;
+                    document.getElementById('sport-select').value = data.sport;
+                    changeSport();
+
+                    bets = data.bets;
+                    updateLists();
+                });
+        }
+        updateSportsSelect();
+    })();
+</script>
+</body>
+</html>

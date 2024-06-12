@@ -1,0 +1,56 @@
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: #f8f8f8;
+}
+
+.bet-slip {
+    position: relative;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.bet-slip .bet-slip-logo {
+
+    max-width: 50%;
+    margin: 0 auto;
+
+}
+
+.bet-slip .bet-slip-logo img {
+    max-width: 100%;
+}
+
+.bet-slip .bet-event {
+    margin-top: 1rem;
+}
+
+.bet-slip .bet-event > div {
+    line-height: 1rem;
+    font-size: 0.9rem;
+}
+
+.bet-slip .bet-event .bet-event-title {
+    line-height: 1.2rem;
+    font-size: 1.2rem;
+}
+
+.bet-event-quote {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.no-background {
+    background-color: transparent !important;
+}
+
+.full-width {
+    width: 100%;
+}
