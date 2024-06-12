@@ -22,14 +22,14 @@
         <div class="row justify-content-center">
             <div class="col-6">
                 <div class="text-center">
-                    <a href="/"><img src="/img/mimmi-sport-logo.png" class="logo-main-100" alt="MimmiBet" ></a>
+                    <a href="/"><img src="/img/mimmi-sport-logo.png" class="logo-main-100" alt="MimmiBet"></a>
                 </div>
 
                 <div class="row">
                     <div class="col-12 mt-3">
                         <div class="card">
                             <div class="card-body" id="odds">
-                                <table class="table table-sm">
+                                <table class="table table-sm" id="table-data">
                                     <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -43,7 +43,8 @@
                                         <th scope="row">aes2</th>
                                         <td>Lorenzo Mimmi</td>
                                         <td>3548754587</td>
-                                        <td><span class="material-icons">link</span><span class="material-icons">done</span></td>
+                                        <td><span class="material-icons">link</span><span
+                                                class="material-icons">done</span></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -60,13 +61,124 @@
         <p>&copy; 2024 <a href="https://meyler.it/">meyler.it</a>. Tutti i diritti riservati.</p>
     </div>
 </footer>
+
+
+<!-- Modal -->
+<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="passwordModalLabel">Inserisci la password</h1>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="login()">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="Username">
+                    </div>
+                    >
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="login()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 
     const apiBaseUrl = '/api/v1';
-    let events = [];
     let bets = [];
-    let id = 'new'
 
+    function claimBet(betID) {
+        window.event.preventDefault();
+        event.preventDefault();
+
+        const data = {
+            password: 'password',
+        };
+
+        fetch(`${apiBaseUrl}/betting/${betID}/claim`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Bet saved')
+                console.log(data);
+                if (data.id) {
+                    id = data.id;
+                    window.location.href = '/schedina?id=' + id;
+                }
+            });
+    }
+
+    function login() {
+        let user = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        }
+        fetch(`${apiBaseUrl}/betting/checkLogin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+    }
+
+    (() => {
+        let user = {
+            username: document.cookie.split('=')[1],
+            password: document.cookie.split('=')[2]
+        }
+        fetch(`${apiBaseUrl}/betting/checkLogin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data === false) {
+                    $('#passwordModal').modal('show');
+                }
+            });
+
+
+        const url = `${apiBaseUrl}/betting/bet`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                bets = data;
+                bets.forEach((bet, index) => {
+                    const table = document.getElementById('table-data');
+                    const row = table.insertRow(index + 1);
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+                    const cell3 = row.insertCell(2);
+                    const cell4 = row.insertCell(3);
+                    cell1.innerHTML = bet.id;
+                    cell2.innerHTML = bet.name;
+                    cell3.innerHTML = bet.phone;
+                    cell4.innerHTML = `<span class="material-icons" onclick="location.href = '/schedina?id=${bet.id}';"">link</span><span class="material-icons" onclick="claimBet('${bet.id}')">done</span>`;
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    })();
 
 </script>
 </body>
