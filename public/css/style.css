@@ -66,3 +66,11 @@ body {
     max-width: 80%;
     margin: 0 auto;
 }
+
+.paid{
+    background-color: #0bb14f2e;
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/img/paid.png");
+}

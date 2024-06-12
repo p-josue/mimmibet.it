@@ -21,21 +21,21 @@
         <div class="row justify-content-center">
             <div class="col-6">
                 <div class="text-center">
-                    <a href="/"><img src="img/mimmi-sport-logo.png" class="logo-main-100" alt="MimmiBet" ></a>
+                    <a href="/"><img src="/img/mimmi-sport-logo.png" class="logo-main-100" alt="MimmiBet" ></a>
                 </div>
 
                 <div class="row">
                     <div class="col-12 mt-3">
                         <div class="card">
                             <div class="card-body" id="odds">
-                                <form action="/schedina.html" method="GET">
+                                <form action="/schedina" method="GET">
                                     <div class="mb-3">
                                         <label for="code" class="form-label">Codice schedina</label>
                                         <input type="text" class="form-control" id="code" placeholder="xxxx" name="id">
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <button type="submit" class="btn btn-primary">Cerca schedina</button>
-                                        <a href="/fake-new.html" class="btn btn-success">Crea la tua schedina</a>
+                                        <a href="/play" class="btn btn-success">Crea la tua schedina</a>
                                     </div>
                                 </form>
                             </div>
@@ -293,7 +293,7 @@
                 console.log(data);
                 if (data.id) {
                     id = data.id;
-                    window.location.href = '/schedina.html?id=' + id;
+                    window.location.href = '/schedina?id=' + id;
                 }
             });
     }

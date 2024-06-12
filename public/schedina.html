@@ -20,22 +20,24 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-6 position-relative">
-                <div class="bet-slip">
+                <div class="bet-slip" id="schedina">
                     <div class="bet-slip-logo mt-5">
-                        <img src="img/mimmi-sport-logo.png" alt="MimmiBet">
+                        <img src="/img/mimmi-sport-logo.png" alt="MimmiBet">
                     </div>
                     <div class="p-3">
                         <form class="row">
                             <div class="col-6">
                                 <div class="mb-3 text-center">
                                     <label for="name" class="form-label h6"><b>Nome e cognome</b></label>
-                                    <input type="text" class="form-control border-0 text-center text-end no-background" id="name" aria-describedby="emailHelp" placeholder="Lorenzo Mimmi" disabled>
+                                    <input type="text" class="form-control border-0 text-center text-end no-background"
+                                           id="name" aria-describedby="emailHelp" placeholder="Lorenzo Mimmi" disabled>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="mb-3 text-center">
                                     <label for="phone" class="form-label h6"><b>Telefono</b></label>
-                                    <input type="text" class="form-control border-0 text-center text-end no-background" id="phone" placeholder="3311223344" disabled>
+                                    <input type="text" class="form-control border-0 text-center text-end no-background"
+                                           id="phone" placeholder="3311223344" disabled>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -53,8 +55,10 @@
                             </div>
                             <div class="col-3 text-end">
                                 <div class="mb-3 ">
-                                    <input type="text" class="form-control border-0 text-end text-end no-background" id="amount"
-                                           aria-describedby="emailHelp" placeholder="0" onchange="updateTotal()" disabled>
+                                    <input type="text" class="form-control border-0 text-end text-end no-background"
+                                           id="amount"
+                                           aria-describedby="emailHelp" placeholder="0" onchange="updateTotal()"
+                                           disabled>
                                 </div>
                             </div>
                             <div class="col-9 ps-5">
@@ -71,7 +75,8 @@
                             </div>
                             <div class="col-3 text-end">
                                 <div class="mb-3 ">
-                                    <input type="text" class="form-control border-0 text-end no-background" id="total" aria-describedby="emailHelp" placeholder="0" disabled>
+                                    <input type="text" class="form-control border-0 text-end no-background" id="total"
+                                           aria-describedby="emailHelp" placeholder="0" disabled>
                                 </div>
                             </div>
                         </form>
@@ -89,39 +94,8 @@
     let bets = [];
     let id = 'new'
 
-    function updateSportsSelect() {
-        const sportSelect = document.getElementById('sport-select');
-        const url = `${apiBaseUrl}/toa/sports`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                sportSelect.innerHTML = '';
-
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.innerText = 'Seleziona uno sport';
-                sportSelect.appendChild(defaultOption);
-
-                data.forEach(sport => {
-                    const option = document.createElement('option');
-                    option.value = sport.key;
-                    option.innerText = sport.title;
-                    sportSelect.appendChild(option);
-                });
-            });
-    }
-
     function getOdds(sportKey) {
         const url = `${apiBaseUrl}/toa/sports/${sportKey}`;
-        // const odds = document.getElementById('odds');
-        // odds.innerHTML = `
-        //     <div class="d-flex justify-content-center">
-        //         <div class="spinner-border" role="status">
-        //             <span class="visually-hidden">Loading...</span>
-        //         </div>
-        //     </div>
-        // `;
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -138,62 +112,8 @@
     }
 
     function updateLists() {
-        // updateEvents();
         updateBets();
         updateTotal();
-    }
-
-    function updateEvents() {
-        const odds = document.getElementById('odds');
-        odds.innerHTML = '';
-
-        events.forEach(event => {
-            const row = document.createElement('div');
-            row.classList.add('row', 'align-items-end', 'mt-3', 'mb-5', 'event');
-            row.dataset.eventId = event.id;
-
-            const homeTeam = event.home_team;
-            const awayTeam = event.away_team;
-
-            const bookmakerMarket = event.bookmaker.markets[0];
-
-            const homeTeamQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === homeTeam).price;
-            const drawQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === 'Draw')?.price;
-            const awayTeamQuotation = bookmakerMarket.outcomes.find(outcome => outcome.name === awayTeam).price;
-
-            const bet = bets.find(bet => bet.event === event.id);
-
-            row.innerHTML = `
-                            <div class="col-5">
-                                <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h5>${homeTeam}</h5>
-                                    <button class="btn ${bet?.winner === 'home'? 'btn-primary':'btn-outline-primary'}" onclick="addBet(this, '${homeTeam}')">
-                                        <span class="quotation">${homeTeamQuotation}</span>
-                                        <i class="fas fa-dollar"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-2">
-                                <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <div>vs</div>
-                                    <button class="btn ${bet?.winner === 'draw'? 'btn-primary':'btn-outline-primary'} ${drawQuotation?'':'d-none'}" onclick="addBet(this)">
-                                        <span class="quotation">${drawQuotation}</span>
-                                        <i class="fas fa-dollar"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-5">
-                                <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h5>${awayTeam}</h5>
-                                    <button class="btn ${bet?.winner === 'away'? 'btn-primary':'btn-outline-primary'}" onclick="addBet(this, '${awayTeam}')">
-                                        <span class="quotation">${awayTeamQuotation}</span>
-                                        <i class="fas fa-dollar"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-            odds.appendChild(row);
-        });
     }
 
     function updateBets() {
@@ -250,87 +170,6 @@
         total.value = parseInt(totalAmount);
     }
 
-    function changeSport() {
-        const sportSelect = document.getElementById('sport-select');
-        const sportKey = sportSelect.value;
-        getOdds(sportKey);
-    }
-
-    function addBet(button, team) {
-        const row = button.closest('.event');
-        const eventId = row.dataset.eventId;
-        const event = events.find(event => event.id === eventId);
-        const homeTeam = event.home_team;
-        const awayTeam = event.away_team;
-
-        let bet = bets.find(bet => bet.event === eventId);
-        let winner = null;
-
-        if (team) {
-            if (team === homeTeam) {
-                winner = 'home';
-            } else if (team === awayTeam) {
-                winner = 'away';
-            }
-        } else {
-            winner = 'draw';
-        }
-
-        if (!bet) {
-            bet = {
-                event: eventId,
-                homeTeam,
-                awayTeam,
-                winner: winner
-            };
-            bets.push(bet);
-        } else {
-            if (bet.winner === winner) {
-                bet.winner = null;
-            } else {
-                bet.winner = winner;
-            }
-        }
-
-        bets = bets.filter(bet => bet.winner);
-
-        updateLists();
-    }
-
-    function saveBets() {
-        window.event.preventDefault();
-        event.preventDefault();
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
-        const amount = document.getElementById('amount').value;
-        const sport = document.getElementById('sport-select').value;
-
-        const data = {
-            name,
-            phone,
-            amount,
-            sport,
-            bets,
-        };
-
-        fetch(`${apiBaseUrl}/betting/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Bet saved')
-                console.log(data);
-                if (data.id) {
-                    id = data.id;
-                    // window.location.href = '/?id=' + id;
-                }
-            });
-    }
-
     (() => {
         const urlParams = new URLSearchParams(window.location.search);
         id = urlParams.get('id') || 'new';
@@ -343,9 +182,12 @@
                     document.getElementById('amount').value = data.amount;
                     bets = data.bets;
                     getOdds(data.sport);
+                    if (data.claimed) {
+                        const divElement = document.getElementById('schedina');
+                        divElement.classList.add('paid');
+                    }
                 });
         }
-        // updateSportsSelect();
     })();
 </script>
 </body>

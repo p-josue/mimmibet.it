@@ -9,6 +9,7 @@ let Bets: {
     name: string;
     phone: string;
     amount: number;
+    claimed: boolean;
 }[] = [] = require('../../../data/betting.json');
 
 const generateBetId = () => {
@@ -33,9 +34,9 @@ router.get('/:id', ({ params: { id } }) => {
     return bet;
 });
 
-router.post('/:id', ({ params: { id }, body: { name, phone, amount, bets, sport, password } }: {
+router.post('/:id', ({ params: { id }, body: { name, phone, amount, bets, sport, password, claimed } }: {
     params: { id: string; };
-    body: { bets: string; sport: string; name: string; phone: string; amount: number; password: string;};
+    body: { bets: string; sport: string; name: string; phone: string; amount: number; password: string; claimed: boolean;};
 }) => {
     console.log(password, process.env.BETTING_PASSWORD)
     if (password !== process.env.BETTING_PASSWORD) {
@@ -52,6 +53,7 @@ router.post('/:id', ({ params: { id }, body: { name, phone, amount, bets, sport,
         bet.name = name;
         bet.phone = phone;
         bet.amount = amount;
+        bet.claimed = claimed;
 
     } else {
         bet = {
@@ -60,7 +62,8 @@ router.post('/:id', ({ params: { id }, body: { name, phone, amount, bets, sport,
             sport,
             name,
             phone,
-            amount
+            amount,
+            claimed: false
         }
         Bets.push(bet);
     }
